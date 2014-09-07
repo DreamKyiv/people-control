@@ -1,0 +1,69 @@
+.people-control-voting-table, .people-control-decisions-table {
+    width: 100%;
+}
+
+td.people-control-decision-date {
+    width: 80px;
+} 
+
+td.people-control-decision-vote {
+    width: 180px;
+} 
+
+td.people-control-decision-vote select{
+    width: 100%;
+}
+
+.people-control-voting-table td {
+    width: 33%;
+    border: 1px grey solid;
+    padding: 1px 3px;   
+}
+
+.people-control-voting-deputy {
+    float: left;
+}
+
+.people-control-voting-result {
+    float: right;
+}
+
+/* pro */
+.people-control-voting-result-3 {
+    font-style: bold;
+    color: green;
+}
+
+/* ni/ni */
+.people-control-voting-result-4 {
+    font-style: bold;
+    color: yellow;
+}
+
+/* contra */
+.people-control-voting-result-5 {
+    font-style: bold;
+    color: red;
+}
+
+/* pro */
+table.people-control-decisions-table tr td.people-control-voting-selector-3 {
+    background-color: green;
+}
+
+/* ni/ni */
+table.people-control-decisions-table tr td.people-control-voting-selector-4 {
+    background-color: yellow;
+}
+
+/* contra */
+table.people-control-decisions-table tr td.people-control-voting-selector-5 {
+    background-color: red;
+}
+
+select.people-control-voting-result-selector {
+    font-size: 12px;
+    width: 70px;
+    height: auto;
+    padding: 0px;
+}
