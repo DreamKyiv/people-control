@@ -33,9 +33,9 @@ class DreamKyivPeopleControlHooks {
 		wp_enqueue_script('people-control', plugins_url('/people-control/js/people-control.js'), array('jquery'));
     }
     
-    private function _deputy_decisions( $deputy_id, $decisions, $hide=true ) {
+    private function _deputy_decisions( $deputy_id, $decisions, $block_id, $hide=true ) {
     	$hide_class = $hide ? ' class="acf-tab_group-hide"' : '';
-    	$ret = '<div'.$hide_class.'><table class="people-control-decisions-table widefat acf-input-table">';
+    	$ret = '<div id="'.$block_id.'"'.$hide_class.'><table class="people-control-decisions-table widefat acf-input-table">';
     	$ret .="<thead><tr><th>Рішення</th><th>Дата голосування</th><th>Голос</th></tr></thead>\n";
     	 
     	$ret .= "<tbody>\n";
@@ -71,7 +71,7 @@ class DreamKyivPeopleControlHooks {
             $dkpc = new DreamKyivPeopleControlDb();
 
             $decisions = $dkpc->get_undefined_decisions_posts( $deputy_id );
-            echo $this->_deputy_decisions( $deputy_id, $decisions, true );
+            echo $this->_deputy_decisions( $deputy_id, $decisions, 'kmda_new_decisions', true );
     	}
 
     	die();
@@ -92,7 +92,7 @@ class DreamKyivPeopleControlHooks {
     		);
 
 			$decisions = $query->get_posts();
-            echo $this->_deputy_decisions( $deputy_id, $decisions, false );
+            echo $this->_deputy_decisions( $deputy_id, $decisions, 'kmda_all_decisions', false );
     	}
 
     	die();
@@ -117,7 +117,7 @@ class DreamKyivPeopleControlHooks {
     }
     
     function edit_form_after_title($post) {
-        if( $post->post_type == 'rada_decision' ) {
+		if( $post->post_type == 'rada_decision' ) {
             if( $post->post_status == 'publish') {
                 
 ?>
@@ -201,10 +201,16 @@ class DreamKyivPeopleControlHooks {
 (function($){
 	<?php $this->init_js_functions() ; ?>
 	
-    jQuery(document).ready( function() {
+	function load_<?= $action ?>() {
         var deputy_id = $('#acf-field-control_deputy_reference').val();
         if( deputy_id ) {
-			$.ajax({
+            var container_id = 'rada-decisions-<?= $args['key'] ?>';
+            var container = $('#' + container_id);
+            if( container.length == 0 ) {
+            	$('div[data-field_key="<?= $args['key'] ?>"]').after('<div id="' + container_id + '"></div>');
+            }
+            $('#' + container_id).html('<span style="font-weight: bold;">Завантажується...</span>');
+        	$.ajax({
 		        url: ajaxurl,
 		        dataType: "html",
 		        data : {
@@ -212,7 +218,7 @@ class DreamKyivPeopleControlHooks {
 			        'deputy_id' : $('#acf-field-control_deputy_reference').val()
 			    },
 		        success: function( data ) {
-		        	$('div[data-field_key="<?= $args['key'] ?>"]').after(data);
+		        	$('#' + container_id).html( data );
 		        	people_control_init_voting_result_selectors();
 		        },
 		        error: function(jqXHR, textStatus, errorThrown) {
@@ -220,6 +226,10 @@ class DreamKyivPeopleControlHooks {
 		        }
 		    });
         }
+	}
+	
+    jQuery(document).ready( function() {
+    	load_<?= $action ?>();
 	})
 })(jQuery);
 </script>
@@ -277,6 +287,8 @@ class DreamKyivPeopleControlHooks {
 			    },
 		        success: function( data ) {
 		        	alert('Результати голосування збережено');
+		        	load_peoplecontrolalldecisions();
+		        	load_peoplecontrolnewdecisions();
 		        },
 		        error: function(jqXHR, textStatus, errorThrown) {
 		        	console.log(jqXHR, textStatus, errorThrown);

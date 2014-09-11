@@ -2,8 +2,13 @@
 
 class DreamKyivPeopleControlDb {
 	
+	static function get_last_votings( $deputy_id, $limit=0 ) {
+		$dkpc = new DreamKyivPeopleControlDb();
+		return $dkpc->get_defined_decisions( $deputy_id, $limit );
+	}
+
 	function get_defined_decisions( $deputy_id, $limit=0 ) {
-		global  $wpdb, $user_level, $user_ID;
+		global  $wpdb;
 			
 		$sql = "SELECT * FROM ".DK_PEOPLE_CONTROL_VOTINGS_TABLE." WHERE deputy_post_id=%s ORDER BY voting_date DESC";
 
@@ -18,7 +23,7 @@ class DreamKyivPeopleControlDb {
 	}
 	
 	function get_undefined_decisions_posts( $deputy_id ) {
-		global  $wpdb, $user_level, $user_ID;
+		global  $wpdb;
 		 
 		// get already defined decisions
 		$defined_decisions = $this->get_defined_decisions($deputy_id);
@@ -48,7 +53,7 @@ class DreamKyivPeopleControlDb {
 	}
     
     function get_voting( $deputy_id, $decision_id ) {
-    	global  $wpdb, $user_level, $user_ID;
+    	global  $wpdb;
     	
     	$sql = $wpdb->prepare( 
     		"SELECT * FROM ".DK_PEOPLE_CONTROL_VOTINGS_TABLE." WHERE decision_post_id=%d AND deputy_post_id=%s",
@@ -60,12 +65,10 @@ class DreamKyivPeopleControlDb {
     }
     
     function set_voting( $deputy_id, $decision_id, $vote ) {
-    	global  $wpdb, $user_level, $user_ID;
-    	get_currentuserinfo();
-    	
+    	global  $wpdb;
+
     	$decision_date = get_field('rada_decision_voting_date', $decision_id);
-    
-    	
+
     	$row = $this->get_voting( $deputy_id, $decision_id );
     	
     	if( $row ) {
@@ -87,23 +90,20 @@ class DreamKyivPeopleControlDb {
         	    $decision_date
         	);
     	}
-    	
-    	error_log( $sql );
+
     	return $wpdb->query( $sql );
     }
     
     function delete_voting( $deputy_id, $decision_id ) {
-    	global  $wpdb, $user_level, $user_ID;
-    	get_currentuserinfo();
-    	
+    	global  $wpdb;
+
 	    $sql = $wpdb->prepare( 
         		"DELETE FROM  ".DK_PEOPLE_CONTROL_VOTINGS_TABLE." WHERE decision_post_id=%d AND deputy_post_id=%d",
 
         	    $decision_id,
         	    $deputy_id    	    
         	);
-    	
-    	error_log( $sql );
+
     	return $wpdb->query( $sql );
     }
 }

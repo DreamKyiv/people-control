@@ -30,15 +30,15 @@ function people_control_activate() {
         $controls = $query->get_posts();
         $dkpc = new DreamKyivPeopleControlDb();
         foreach( $controls as $c ) {
-            error_log( '... ' . $c->ID );
+            //error_log( '... ' . $c->ID );
             $deputy_id = url_to_postid( get_field('control_deputy_reference', $c->ID ) );
-            error_log( 'dep '.$deputy_id);
+            //error_log( 'dep '.$deputy_id);
 
             $votings = get_field('control_voting', $c->ID);
             for( $i=0; $i < count($votings) ; $i++ ) {
-                error_log( print_r($votings[$i],1) );
+                //error_log( print_r($votings[$i],1) );
                 $decision_id = url_to_postid( $votings[$i]['control_voting_decision'] );
-                error_log( 'des '.$decision_id);
+                //error_log( 'des '.$decision_id);
                 if( $decision_id ) {
                     $control_voting_vote = $votings[$i]['control_voting_vote'];
                     $dkpc->set_voting( $deputy_id, $decision_id, $control_voting_vote);
