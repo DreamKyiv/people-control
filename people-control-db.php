@@ -32,7 +32,7 @@ class DreamKyivPeopleControlDb {
 		foreach($defined_decisions as $dd ) {
 			$defined_decisions_ids[] = $dd->decision_post_id;
 		}
-		
+
 		$query = new WP_Query(
             array(
                 'post_type' => 'rada_decision',

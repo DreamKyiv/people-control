@@ -66,12 +66,13 @@ class DreamKyivPeopleControlHooks {
     
     function ajax_deputy_new_decisions() {
     	$deputy_id  = intval( $_GET['deputy_id'] );
+    	$hide  = intval( $_GET['order_no'] ) > 0;
 
     	if( $deputy_id ) {
             $dkpc = new DreamKyivPeopleControlDb();
 
             $decisions = $dkpc->get_undefined_decisions_posts( $deputy_id );
-            echo $this->_deputy_decisions( $deputy_id, $decisions, 'kmda_new_decisions', true );
+            echo $this->_deputy_decisions( $deputy_id, $decisions, 'kmda_new_decisions', false );
     	}
 
     	die();
@@ -79,6 +80,7 @@ class DreamKyivPeopleControlHooks {
     
     function ajax_deputy_all_decisions() {
     	$deputy_id  = intval( $_GET['deputy_id'] );
+    	$hide  = intval( $_GET['order_no'] ) > 0;
 
     	if( $deputy_id ) {
     		$query = new WP_Query(
@@ -199,7 +201,7 @@ class DreamKyivPeopleControlHooks {
 ?>
 <script type="text/javascript">
 (function($){
-	<?php $this->init_js_functions() ; ?>
+	<?php $this->init_js_functions(); ?>
 	
 	function load_<?= $action ?>() {
         var deputy_id = $('#acf-field-control_deputy_reference').val();
@@ -215,11 +217,15 @@ class DreamKyivPeopleControlHooks {
 		        dataType: "html",
 		        data : {
 		        	'action' : '<?= $action ?>',
+		        	'order_no' : '<?= $args['order_no'] ?>',
 			        'deputy_id' : $('#acf-field-control_deputy_reference').val()
 			    },
 		        success: function( data ) {
 		        	$('#' + container_id).html( data );
 		        	people_control_init_voting_result_selectors();
+		        	$('a[data-key="<?= $args['key'] ?>"]').click( function() {
+		        		load_<?= $action ?>();
+		    		});
 		        },
 		        error: function(jqXHR, textStatus, errorThrown) {
 		        	console.log(jqXHR, textStatus, errorThrown);
@@ -272,7 +278,7 @@ class DreamKyivPeopleControlHooks {
         return $this->options[ $value ];
     }
     
-    function init_js_functions() {
+    function init_js_functions( $adds='' ) {
 ?>
 	function people_control_init_voting_result_selectors() {
 		$('select.people-control-voting-result-selector').change( function() {
@@ -287,8 +293,7 @@ class DreamKyivPeopleControlHooks {
 			    },
 		        success: function( data ) {
 		        	alert('Результати голосування збережено');
-		        	load_peoplecontrolalldecisions();
-		        	load_peoplecontrolnewdecisions();
+		        	<?= $adds ?>
 		        },
 		        error: function(jqXHR, textStatus, errorThrown) {
 		        	console.log(jqXHR, textStatus, errorThrown);
