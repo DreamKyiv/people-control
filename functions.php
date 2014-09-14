@@ -89,7 +89,8 @@ class DreamKyivPeopleControlHooks {
     						'post_status' => 'publish',
     						'meta_key' => 'rada_decision_voting_date',
     						'orderby' => 'meta_value_num',
-    						'order' => 'DESC'
+    						'order' => 'DESC',
+    						'nopaging'=>true
     				)
     		);
 
@@ -148,7 +149,18 @@ oPeopleControl = { 'loaders' : {}, 'realod' : false };
     	$('#publish').hide();
     	<?php } ?>
 
+    	$('#title').attr('title', $('#title').val() );
+
     	oPeopleControl.people_control_init_voting_result_selectors();
+
+    	$('#voting-results-toggle').click( function() {
+    		if( $('#voting-results-table').is(':visible') ) {
+    			$('#voting-results-table').hide();
+    		} else {
+        		$('#voting-results-table').show();
+    		}
+        	return false;
+        });
     });
 })(jQuery);
 
@@ -156,14 +168,15 @@ oPeopleControl = { 'loaders' : {}, 'realod' : false };
 <?php
                 
                 $kandidats_per_row = 3;
-                echo "<table class='people-control-voting-table'>\n";
+                $voting_table = "<table class='people-control-voting-table'>\n";
                 
                 $query = new WP_Query(
                         array(
                             'post_type' => 'deputy_control',
                             'post_status' => 'publish',
                             'orderby' => 'title',
-                            'order' => 'ASC'
+                            'order' => 'ASC',
+                            'nopaging'=>true
                         )
                     );    
                     
@@ -172,41 +185,54 @@ oPeopleControl = { 'loaders' : {}, 'realod' : false };
                     $dkpc = new DreamKyivPeopleControlDb();
                     $decision_id = $post->ID;
                     $i=0;
+                    $voting_results = array(0,0,0,0,0,0);
                     foreach( $controls as $c ) {                        
                         if( $i === 0 ) {
                             echo "<tr>";
                         }
                         
-                        echo "<td>";
+                        $voting_table .= "<td>";
                         $deputy_id = url_to_postid( get_field('control_deputy_reference', $c->ID ) );                     
-                        echo $this->get_deputy_link($deputy_id);
+                        $voting_table .= $this->get_deputy_link($deputy_id);
                         
                         $data = $dkpc->get_voting( $deputy_id, $decision_id );
+                        $voting_results[ intval($data->vote) ]++;
                                        
                         if( current_user_can('edit_kandidat', $deputy_id) ) {
                             // can change voting result
-                            echo "<div class='people-control-voting-result'>". $this->get_voting_option_selector( $deputy_id, $decision_id, $data->vote ) . "</div>";
+                            $voting_table .="<div class='people-control-voting-result'>". $this->get_voting_option_selector( $deputy_id, $decision_id, c ) . "</div>";
                         } else {
                             // can only read voting result
-                            echo "<div class='people-control-voting-result people-control-voting-result-".$data->vote."'>". $this->get_voting_option_label( $data->vote ) . "</div>";
+                            $voting_table .="<div class='people-control-voting-result people-control-voting-result-".$data->vote."'>". $this->get_voting_option_label( $data->vote ) . "</div>";
                         }
                            
-                        echo "</td>";
+                        $voting_table .= "</td>";
                         
                         $i++;
                         if( $i == $kandidats_per_row ) {
-                            echo "</tr>\n";
+                            $voting_table .="</tr>\n";
                             $i = 0;
                         } 
                     }
                 }            
                 
                 if( $i < $kandidats_per_row  ) {
-                    echo str_repeat('<td>&nbsp;</td>',$kandidats_per_row-$i);
-                    echo "</tr>\n";
+                    $voting_table .=str_repeat('<td>&nbsp;</td>',$kandidats_per_row-$i);
+                    $voting_table .= "</tr>\n";
                 }
                 
-                echo "</table>";
+                $voting_table .= "</table>";
+                
+                echo "<div id='voting-results'>\n";
+    	 		echo "Результати голосування:<br/><table><tr>";
+    	 		foreach( $voting_results as $vote => $result ) {
+    	 			echo "<td style='padding: 2px 20px 2px 0;'>". ( $vote ? $this->options[$vote] : 'Не встановлено' ) . ' : ' . $result ."</td>";
+    	 		}
+    	 		echo "</tr></table>\n";
+    	 		echo "<a href='#' id='voting-results-toggle' title='Клікніть щоб побачити поіменні результати голосування'>Поіменні результати &gt;&gt;&gt</a>";
+    	 		echo "<div id='voting-results-table' style='display: none;'>";
+                echo $voting_table;
+                echo "</div></div>\n";
             }
         }
     }

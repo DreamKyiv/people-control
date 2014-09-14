@@ -40,7 +40,8 @@ class DreamKyivPeopleControlDb {
                 'post__not_in' => $defined_decisions_ids,
             	'meta_key' => 'rada_decision_voting_date',
             	'orderby' => 'meta_value_num',
-            	'order' => 'DESC'
+            	'order' => 'DESC',
+            	'nopaging'=>true
             )
         );
 

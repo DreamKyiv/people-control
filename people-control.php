@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: DreamKyiv People Control
-Version: 0.0.4
+Version: 0.0.5
 Description: Plugin for Kyiv rada deputies control
 Author: Vitaliy Pylypiv
 GitHub Plugin URI: https://github.com/DreamKyiv/people-control
