@@ -37,7 +37,10 @@ class DreamKyivPeopleControlDb {
             array(
                 'post_type' => 'rada_decision',
                 'post_status' => 'publish',
-                'post__not_in' => $defined_decisions_ids
+                'post__not_in' => $defined_decisions_ids,
+            	'meta_key' => 'rada_decision_voting_date',
+            	'orderby' => 'meta_value_num',
+            	'order' => 'DESC'
             )
         );
 

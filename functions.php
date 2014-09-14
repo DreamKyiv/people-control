@@ -119,12 +119,25 @@ class DreamKyivPeopleControlHooks {
     }
     
     function edit_form_after_title($post) {
-		if( $post->post_type == 'rada_decision' ) {
+    	if( $post->post_type == 'deputy_control' ) {
+?>
+<script type="text/javascript">
+var oPeopleControl = { 'loaders' : {} };
+
+(function($){
+	<?php $this->init_js_functions() ; ?>
+})(jQuery);
+
+</script>
+<?php
+    	} elseif( $post->post_type == 'rada_decision' ) {
             if( $post->post_status == 'publish') {
                 
 ?>
 
 <script type="text/javascript">
+var oPeopleControl = { 'loaders' : {}, 'realod' : false };
+
 (function($){
 	<?php $this->init_js_functions() ; ?>
 	
@@ -134,7 +147,7 @@ class DreamKyivPeopleControlHooks {
     	$('#publish').hide();
     	<?php } ?>
 
-    	people_control_init_voting_result_selectors();
+    	oPeopleControl.people_control_init_voting_result_selectors();
     });
 })(jQuery);
 
@@ -201,13 +214,15 @@ class DreamKyivPeopleControlHooks {
 ?>
 <script type="text/javascript">
 (function($){
-	<?php $this->init_js_functions(); ?>
-	
-	function load_<?= $action ?>() {
+
+	oPeopleControl.loaders.load_<?= $action ?> = function() {
         var deputy_id = $('#acf-field-control_deputy_reference').val();
         if( deputy_id ) {
             var container_id = 'rada-decisions-<?= $args['key'] ?>';
             var container = $('#' + container_id);
+
+            loading = true;
+            
             if( container.length == 0 ) {
             	$('div[data-field_key="<?= $args['key'] ?>"]').after('<div id="' + container_id + '"></div>');
             }
@@ -222,10 +237,14 @@ class DreamKyivPeopleControlHooks {
 			    },
 		        success: function( data ) {
 		        	$('#' + container_id).html( data );
-		        	people_control_init_voting_result_selectors();
-		        	$('a[data-key="<?= $args['key'] ?>"]').click( function() {
-		        		load_<?= $action ?>();
-		    		});
+		        	oPeopleControl.people_control_init_voting_result_selectors( '#' + container_id +' ' );
+
+		        	$('a[data-key="<?= $args['key'] ?>"]').click( function () {
+		            	if( oPeopleControl.reload ) {
+		        			oPeopleControl.loaders.load_<?= $action ?>();
+		        			oPeopleControl.reload = false;
+		            	}
+		        	});
 		        },
 		        error: function(jqXHR, textStatus, errorThrown) {
 		        	console.log(jqXHR, textStatus, errorThrown);
@@ -235,7 +254,7 @@ class DreamKyivPeopleControlHooks {
 	}
 	
     jQuery(document).ready( function() {
-    	load_<?= $action ?>();
+    	oPeopleControl.loaders.load_<?= $action ?>();
 	})
 })(jQuery);
 </script>
@@ -280,8 +299,13 @@ class DreamKyivPeopleControlHooks {
     
     function init_js_functions( $adds='' ) {
 ?>
-	function people_control_init_voting_result_selectors() {
-		$('select.people-control-voting-result-selector').change( function() {
+	oPeopleControl.people_control_init_voting_result_selectors = function ( parent='' ) {
+		var sel = 'select.people-control-voting-result-selector';
+		if( parent ) {
+			sel = parent + ' ' + sel;
+		}
+	
+		$(sel).change( function( e ) {
 			$.ajax({
 		        url: ajaxurl,			    	
 		        dataType: "json",
@@ -292,6 +316,7 @@ class DreamKyivPeopleControlHooks {
 			        'vote' : $(this).val()
 			    },
 		        success: function( data ) {
+		        	oPeopleControl.reload = true;
 		        	alert('Результати голосування збережено');
 		        	<?= $adds ?>
 		        },
@@ -299,6 +324,8 @@ class DreamKyivPeopleControlHooks {
 		        	console.log(jqXHR, textStatus, errorThrown);
 		        }
 		    });
+		    
+		    e.stopPropagation();
 	   	});
 	}
 <?php 
