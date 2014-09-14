@@ -122,12 +122,13 @@ class DreamKyivPeopleControlHooks {
     	if( $post->post_type == 'deputy_control' ) {
 ?>
 <script type="text/javascript">
-var oPeopleControl = { 'loaders' : {} };
+oPeopleControl = { 'loaders' : {}, 'realod' : false };
+</script>
 
+<script type="text/javascript">
 (function($){
 	<?php $this->init_js_functions() ; ?>
 })(jQuery);
-
 </script>
 <?php
     	} elseif( $post->post_type == 'rada_decision' ) {
@@ -136,7 +137,7 @@ var oPeopleControl = { 'loaders' : {} };
 ?>
 
 <script type="text/javascript">
-var oPeopleControl = { 'loaders' : {}, 'realod' : false };
+oPeopleControl = { 'loaders' : {}, 'realod' : false };
 
 (function($){
 	<?php $this->init_js_functions() ; ?>
@@ -299,7 +300,7 @@ var oPeopleControl = { 'loaders' : {}, 'realod' : false };
     
     function init_js_functions( $adds='' ) {
 ?>
-	oPeopleControl.people_control_init_voting_result_selectors = function ( parent='' ) {
+	oPeopleControl.people_control_init_voting_result_selectors = function ( parent ) {
 		var sel = 'select.people-control-voting-result-selector';
 		if( parent ) {
 			sel = parent + ' ' + sel;
